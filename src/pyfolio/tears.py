@@ -14,6 +14,8 @@
 # limitations under the License.
 import warnings
 from time import time
+from PIL import Image
+import datetime as dt
 
 import empyrical as ep
 import matplotlib.gridspec as gridspec
@@ -21,6 +23,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from IPython.display import display, Markdown
+import webbrowser
 
 from . import capacity
 from . import perf_attrib
@@ -86,6 +89,7 @@ def create_full_tear_sheet(
     pos_in_dollars=True,
     header_rows=None,
     factor_partitions=FACTOR_PARTITIONS,
+    return_fig=False,
 ):
     """
     Generate a number of tear sheets that are useful
@@ -182,6 +186,8 @@ def create_full_tear_sheet(
         - See create_perf_attrib_tear_sheet().
     """
 
+    assert isinstance(returns, pd.Series), 'The returns must be sent as a Pandas series.'
+
     if (
         (unadjusted_returns is None)
         and (slippage is not None)
@@ -263,7 +269,6 @@ def create_full_tear_sheet(
                 factor_partitions=factor_partitions,
             )
 
-
 @plotting.customize
 def create_simple_tear_sheet(
     returns,
@@ -275,6 +280,7 @@ def create_simple_tear_sheet(
     live_start_date=None,
     turnover_denom="AGB",
     header_rows=None,
+    return_fig=False,
 ):
     """
     Simpler version of create_full_tear_sheet; generates summary performance
@@ -461,7 +467,12 @@ def create_simple_tear_sheet(
             top=False,
             labelbottom=True,
         )
-
+    
+    if return_fig:
+        return fig
+    else:
+        show_image(fig)
+    
 
 @plotting.customize
 def create_returns_tear_sheet(
@@ -656,7 +667,8 @@ def create_returns_tear_sheet(
 
     if return_fig:
         return fig
-
+    else:
+        show_image(fig)
 
 @plotting.customize
 def create_position_tear_sheet(
@@ -762,7 +774,8 @@ def create_position_tear_sheet(
 
     if return_fig:
         return fig
-
+    else:
+        show_image(fig)
 
 @plotting.customize
 def create_txn_tear_sheet(
@@ -863,7 +876,8 @@ def create_txn_tear_sheet(
 
     if return_fig:
         return fig
-
+    else:
+        show_image(fig)
 
 @plotting.customize
 def create_round_trip_tear_sheet(
@@ -960,7 +974,8 @@ def create_round_trip_tear_sheet(
 
     if return_fig:
         return fig
-
+    else:
+        show_image(fig)
 
 @plotting.customize
 def create_interesting_times_tear_sheet(
@@ -1058,7 +1073,8 @@ def create_interesting_times_tear_sheet(
 
     if return_fig:
         return fig
-
+    else:
+        show_image(fig)
 
 @plotting.customize
 def create_capacity_tear_sheet(
@@ -1187,7 +1203,8 @@ def create_capacity_tear_sheet(
 
     if return_fig:
         return fig
-
+    else:
+        show_image(fig)
 
 @plotting.customize
 def create_perf_attrib_tear_sheet(
@@ -1313,3 +1330,12 @@ def create_perf_attrib_tear_sheet(
 
     if return_fig:
         return fig
+    else:
+        show_image(fig)
+
+def show_image(picture):
+    #work around as images dont show in spyder
+
+    filename = r'C:\tmp\backtrader_results_' + dt.datetime.now().strftime("%Y%m%d-%H%M%S")
+    picture.savefig(fname=filename, dpi=200)
+    Image.open(filename+'.png').show()
