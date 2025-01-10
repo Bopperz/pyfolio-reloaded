@@ -1339,3 +1339,4 @@ def show_image(picture):
     filename = r'C:\tmp\backtrader_results_' + dt.datetime.now().strftime("%Y%m%d-%H%M%S")
     picture.savefig(fname=filename, dpi=200)
     Image.open(filename+'.png').show()
+    return

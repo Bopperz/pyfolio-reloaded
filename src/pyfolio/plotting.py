@@ -846,7 +846,7 @@ def plot_rolling_returns(
                 is_returns,
                 len(oos_cum_returns),
                 cone_std=cone_std,
-                starting_value=is_cum_returns[-1],
+                starting_value=is_cum_returns.iloc[-1],
             )
 
             cone_bounds = cone_bounds.set_index(oos_cum_returns.index)
@@ -1738,8 +1738,15 @@ def plot_txn_time_hist(
         ax = plt.gca()
 
     txn_time = transactions.copy()
-
-    txn_time.index = txn_time.index.tz_localize(pytz.timezone(tz))
+    
+    try:
+        txn_time.index = txn_time.index.tz_localize(pytz.timezone(tz))
+    except TypeError as e:
+        if str(e) == 'Already tz-aware, use tz_convert to convert.':
+            txn_time.index = txn_time.index.tz_convert(pytz.timezone(tz))
+        else:
+            raise
+        
     txn_time.index = txn_time.index.map(lambda x: x.hour * 60 + x.minute)
     txn_time["trade_value"] = (txn_time.amount * txn_time.price).abs()
     txn_time = (
