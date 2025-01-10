@@ -54,7 +54,6 @@ def customize(func):
 
     return call_w_context
 
-
 def plotting_context(context="notebook", font_scale=1.5, rc=None):
     """
     Create pyfolio default plotting style context.
@@ -320,7 +319,7 @@ def plot_holdings(returns, positions, legend_loc="best", ax=None, **kwargs):
 
     positions = positions.copy().drop("cash", axis="columns")
     df_holdings = positions.replace(0, np.nan).count(axis=1)
-    df_holdings_by_month = df_holdings.resample("1M").mean()
+    df_holdings_by_month = df_holdings.resample("ME").mean()
     df_holdings.plot(color="steelblue", alpha=0.6, lw=0.5, ax=ax, **kwargs)
     df_holdings_by_month.plot(color="orangered", lw=2, ax=ax, **kwargs)
     ax.axhline(df_holdings.values.mean(), color="steelblue", ls="--", lw=3)
@@ -676,11 +675,11 @@ def show_perf_stats(
 
     if return_df:
         return perf_stats
-    utils.print_table(
-        perf_stats,
-        float_format="{0:.2f}".format,
-        header_rows=header_rows,
-    )
+    utils.print_table(perf_stats,
+                      float_format="{0:.2f}".format,
+                      header_rows=header_rows,
+                      web_print=True,
+                      )
 
 
 def plot_returns(returns, live_start_date=None, ax=None):
@@ -1206,18 +1205,21 @@ def show_and_plot_top_positions(
             pd.DataFrame(df_top_long * 100, columns=["max"]),
             float_format="{0:.2f}%".format,
             name="Top 10 long positions of all time",
+            web_print=True,
         )
 
         utils.print_table(
             pd.DataFrame(df_top_short * 100, columns=["max"]),
             float_format="{0:.2f}%".format,
             name="Top 10 short positions of all time",
+            web_print=True,
         )
 
         utils.print_table(
             pd.DataFrame(df_top_abs * 100, columns=["max"]),
             float_format="{0:.2f}%".format,
             name="Top 10 positions of all time",
+            web_print=True,
         )
 
     if show_and_plot == 0 or show_and_plot == 2:
@@ -1404,7 +1406,8 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
             linestyle="",
         )
         ax.legend(handles=[red_dots], frameon=True, framealpha=0.5)
-    ax.set_xticklabels(["Daily", "Weekly", "Monthly"])
+    #ax.set_xticklabels(["Daily", "Weekly", "Monthly"])
+    ax.set_xticks([0,1,2],["Daily", "Weekly", "Monthly"])
     ax.set_title("Return quantiles")
 
     return ax
@@ -1462,7 +1465,7 @@ def plot_turnover(
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
     df_turnover = txn.get_turnover(positions, transactions, turnover_denom)
-    df_turnover_by_month = df_turnover.resample("M").mean()
+    df_turnover_by_month = df_turnover.resample("ME").mean()
     df_turnover.plot(color="steelblue", alpha=1.0, lw=0.5, ax=ax, **kwargs)
     df_turnover_by_month.plot(color="orangered", alpha=0.5, lw=2, ax=ax, **kwargs)
     ax.axhline(df_turnover.mean(), color="steelblue", linestyle="--", lw=3, alpha=1.0)
@@ -1736,7 +1739,7 @@ def plot_txn_time_hist(
 
     txn_time = transactions.copy()
 
-    txn_time.index = txn_time.index.tz_convert(pytz.timezone(tz))
+    txn_time.index = txn_time.index.tz_localize(pytz.timezone(tz))
     txn_time.index = txn_time.index.map(lambda x: x.hour * 60 + x.minute)
     txn_time["trade_value"] = (txn_time.amount * txn_time.price).abs()
     txn_time = (
@@ -1784,6 +1787,7 @@ def show_worst_drawdown_periods(returns, top=5):
         drawdown_df.sort_values("Net drawdown in %", ascending=False),
         name="Worst drawdown periods",
         float_format="{0:.2f}".format,
+        web_print=True,
     )
 
 
@@ -1929,6 +1933,7 @@ def show_profit_attribution(round_trips):
         ),
         name="Profitability (PnL / PnL total) per name",
         float_format="{:.2%}".format,
+        web_print=True
     )
 
 
