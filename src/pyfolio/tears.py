@@ -374,15 +374,15 @@ def create_simple_tear_sheet(
     if live_start_date is not None:
         live_start_date = ep.utils.get_utc_timestamp(live_start_date)
 
-    plotting.show_perf_stats(
-        returns,
-        benchmark_rets,
-        positions=positions,
-        transactions=transactions,
-        turnover_denom=turnover_denom,
-        live_start_date=live_start_date,
-        header_rows=header_rows,
-    )
+    perf_stats = plotting.show_perf_stats(returns,
+                                          benchmark_rets,
+                                          positions=positions,
+                                          transactions=transactions,
+                                          turnover_denom=turnover_denom,
+                                          live_start_date=live_start_date,
+                                          header_rows=header_rows,
+                                          return_df=return_fig,
+                                          )
 
     fig = plt.figure(figsize=(14, vertical_sections * 6))
     gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
@@ -401,7 +401,7 @@ def create_simple_tear_sheet(
         returns,
         factor_returns=benchmark_rets,
         live_start_date=live_start_date,
-        cone_std=(1.0, 1.5, 2.0),
+        #cone_std=(1.0, 1.5, 2.0),
         ax=ax_rolling_returns,
     )
     ax_rolling_returns.set_title("Cumulative returns")
@@ -469,7 +469,7 @@ def create_simple_tear_sheet(
         )
     
     if return_fig:
-        return fig
+        return fig, perf_stats
     else:
         show_image(fig)
     
