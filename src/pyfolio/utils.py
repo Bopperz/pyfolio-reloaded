@@ -22,6 +22,7 @@ import pandas as pd
 from IPython.display import display, HTML
 from matplotlib.pyplot import cm
 from packaging.version import Version
+import webbrowser
 
 from . import pos
 from . import txn
@@ -186,7 +187,7 @@ def extract_rets_pos_txn_from_zipline(backtest):
     return returns, positions, transactions
 
 
-def print_table(table, name=None, float_format=None, formatters=None, header_rows=None):
+def print_table(table, name=None, float_format=None, formatters=None, header_rows=None, web_print=False):
     """
     Pretty print a pandas DataFrame.
 
@@ -215,25 +216,36 @@ def print_table(table, name=None, float_format=None, formatters=None, header_row
 
     if name is not None:
         table.columns.name = name
+    else:
+        #name not given, take from table
+        name = table.columns[0]
 
-    html = table.to_html(float_format=float_format, formatters=formatters)
-
-    if header_rows is not None:
-        # Count the number of columns for the text to span
-        n_cols = html.split("<thead>")[1].split("</thead>")[0].count("<th>")
-
-        # Generate the HTML for the extra rows
-        rows = ""
-        for name, value in header_rows.items():
-            rows += (
-                '\n    <tr style="text-align: right;"><th>%s</th>'
-                + "<td colspan=%d>%s</td></tr>"
-            ) % (name, n_cols, value)
-
-        # Inject the new HTML
-        html = html.replace("<thead>", "<thead>" + rows)
-
-    display(HTML(html))
+    if web_print == True:
+        FILE = r"C:\\tmp\\"+name+".html"
+        html = table.to_html()
+        text_file = open(FILE, "w")
+        text_file.write(html)
+        text_file.close()
+        webbrowser.open(FILE, new=2)
+    else:
+        html = table.to_html(float_format=float_format, formatters=formatters)
+    
+        if header_rows is not None:
+            # Count the number of columns for the text to span
+            n_cols = html.split("<thead>")[1].split("</thead>")[0].count("<th>")
+    
+            # Generate the HTML for the extra rows
+            rows = ""
+            for name, value in header_rows.items():
+                rows += (
+                    '\n    <tr style="text-align: right;"><th>%s</th>'
+                    + "<td colspan=%d>%s</td></tr>"
+                ) % (name, n_cols, value)
+    
+            # Inject the new HTML
+            html = html.replace("<thead>", "<thead>" + rows)
+    
+        display(HTML(html))
 
 
 def standardize_data(x):
